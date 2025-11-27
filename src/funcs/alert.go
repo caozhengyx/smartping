@@ -13,7 +13,7 @@ import (
 	"github.com/caozhengyx/smartping/src/g"
 	"github.com/caozhengyx/smartping/src/nettools"
 	"github.com/cihub/seelog"
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 )
 
 func StartAlert() {
