@@ -3,17 +3,18 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/jakecoffman/cron"
-	"github.com/smartping/smartping/src/funcs"
-	"github.com/smartping/smartping/src/g"
-	"github.com/smartping/smartping/src/http"
 	"os"
 	"runtime"
+
+	"github.com/caozhengyx/smartping/src/funcs"
+	"github.com/caozhengyx/smartping/src/g"
+	"github.com/caozhengyx/smartping/src/http"
+	"github.com/jakecoffman/cron"
 	//"sync"
 )
 
 // Init config
-var Version = "0.8.0"
+var Version = "0.9.0"
 
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())

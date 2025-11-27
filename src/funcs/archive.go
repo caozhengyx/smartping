@@ -1,12 +1,13 @@
 package funcs
 
 import (
-	"github.com/cihub/seelog"
-	"github.com/smartping/smartping/src/g"
 	"strconv"
+
+	"github.com/caozhengyx/smartping/src/g"
+	"github.com/cihub/seelog"
 )
 
-//clear timeout alert table
+// clear timeout alert table
 func ClearArchive() {
 	seelog.Info("[func:ClearArchive] ", "starting run ClearArchive ")
 	g.DLock.Lock()

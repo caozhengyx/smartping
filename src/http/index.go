@@ -1,10 +1,11 @@
 package http
 
 import (
-	"github.com/smartping/smartping/src/g"
 	"net/http"
 	"path/filepath"
 	"strings"
+
+	"github.com/caozhengyx/smartping/src/g"
 )
 
 func configIndexRoutes() {

@@ -2,16 +2,18 @@ package funcs
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"github.com/cihub/seelog"
-	_ "github.com/mattn/go-sqlite3"
-	"github.com/smartping/smartping/src/g"
-	"github.com/smartping/smartping/src/nettools"
 	"net/smtp"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/caozhengyx/smartping/src/g"
+	"github.com/caozhengyx/smartping/src/nettools"
+	"github.com/cihub/seelog"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func StartAlert() {
@@ -128,16 +130,55 @@ func AlertSendMail(t g.AlertLog) {
 }
 
 func SendMail(user, pwd, host, to, subject, body string) error {
-	if len(strings.Split(host, ":")) == 1 {
-		host = host + ":25"
+	if !strings.Contains(host, ":") {
+		host += ":25" // 默认使用25端口
 	}
-	auth := smtp.PlainAuth("", user, pwd, strings.Split(host, ":")[0])
-	content_type := "Content-Type: text/html" + "; charset=UTF-8"
-	msg := []byte("To: " + to + "\r\nFrom: " + user + "\r\nSubject: " + subject + "\r\n" + content_type + "\r\n\r\n" + body)
-	send_to := strings.Split(to, ";")
-	err := smtp.SendMail(host, auth, user, send_to, msg)
-	if err != nil {
-		return err
+	parts := strings.Split(host, ":")
+	server := parts[0]
+	port := parts[1]
+
+	recipients := strings.Split(to, ";")
+	msg := fmt.Sprintf("To: %s\r\nFrom: %s\r\nSubject: %s\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n%s",
+		to, user, subject, body)
+
+	if port == "465" {
+		// 使用 TLS 方式连接
+		conn, err := tls.Dial("tcp", host, &tls.Config{
+			InsecureSkipVerify: true,
+			ServerName:         server,
+		})
+		if err != nil {
+			return fmt.Errorf("TLS dial error: %v", err)
+		}
+		client, err := smtp.NewClient(conn, server)
+		if err != nil {
+			return fmt.Errorf("SMTP client error: %v", err)
+		}
+		auth := smtp.PlainAuth("", user, pwd, server)
+		if err = client.Auth(auth); err != nil {
+			return fmt.Errorf("auth error: %v", err)
+		}
+		if err = client.Mail(user); err != nil {
+			return err
+		}
+		for _, addr := range recipients {
+			if err = client.Rcpt(strings.TrimSpace(addr)); err != nil {
+				return err
+			}
+		}
+		w, err := client.Data()
+		if err != nil {
+			return err
+		}
+		_, err = w.Write([]byte(msg))
+		if err != nil {
+			return err
+		}
+		w.Close()
+		return client.Quit()
+	} else {
+		// 使用普通方式发送
+		auth := smtp.PlainAuth("", user, pwd, server)
+		return smtp.SendMail(host, auth, user, recipients, []byte(msg))
 	}
-	return nil
 }
