@@ -65,7 +65,7 @@ function status() {
 function build() {
     go get -v ./...
     #go build src/ping/goping/goping.go
-    go build src/smartping.go
+    CGO_ENABLED=1 go build src/smartping.go
     if [ $? -ne 0 ]; then
         exit $?
     fi

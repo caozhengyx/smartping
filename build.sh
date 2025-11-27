@@ -1,1 +1,1 @@
-go build -o bin/smartping src/smartping.go
+CGO_ENABLED=1 go build -o bin/smartping src/smartping.go
