@@ -692,7 +692,7 @@ func configApiRoutes() {
 			Series: []chart.Series{
 				chart.ContinuousSeries{
 					Style: chart.Style{
-						//Show:        true,
+						Show:        true,
 						StrokeColor: drawing.Color{249, 246, 241, 255},
 						FillColor:   drawing.Color{249, 246, 241, 255},
 					},
@@ -701,7 +701,7 @@ func configApiRoutes() {
 				},
 				chart.ContinuousSeries{
 					Style: chart.Style{
-						//Show:        true,
+						Show:        true,
 						StrokeColor: drawing.Color{0, 204, 102, 200},
 						FillColor:   drawing.Color{0, 204, 102, 200},
 					},
@@ -711,7 +711,7 @@ func configApiRoutes() {
 				},
 				chart.ContinuousSeries{
 					Style: chart.Style{
-						//Show:        true,
+						Show:        true,
 						StrokeColor: drawing.Color{255, 0, 0, 200},
 						FillColor:   drawing.Color{255, 0, 0, 200},
 					},
