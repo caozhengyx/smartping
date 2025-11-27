@@ -587,13 +587,32 @@ func configApiRoutes() {
 			return
 		}
 		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			seelog.Error("[func:/api/graph.png] Read body error: ", err)
+			GraphText(80, 70, "READ DATA ERROR").Save(w)
+			return
+		}
 		err = json.Unmarshal(body, &config)
 		if err != nil {
+			seelog.Error("[func:/api/graph.png] Parse JSON error: ", err, " body: ", string(body))
 			GraphText(80, 70, "PARSE DATA ERROR").Save(w)
 			return
 		}
 		// 检查数据是否为空
 		if len(config.LossPk) == 0 || len(config.AvgDelay) == 0 || len(config.Lastcheck) == 0 {
+			seelog.Debug("[func:/api/graph.png] Empty data, LossPk:", len(config.LossPk), " AvgDelay:", len(config.AvgDelay), " Lastcheck:", len(config.Lastcheck))
+			GraphText(100, 70, "NO DATA").Save(w)
+			return
+		}
+		// 确保数组长度一致
+		minLen := len(config.LossPk)
+		if len(config.AvgDelay) < minLen {
+			minLen = len(config.AvgDelay)
+		}
+		if len(config.Lastcheck) < minLen {
+			minLen = len(config.Lastcheck)
+		}
+		if minLen == 0 {
 			GraphText(100, 70, "NO DATA").Save(w)
 			return
 		}
@@ -602,7 +621,7 @@ func configApiRoutes() {
 		LossPk := []float64{}
 		Bkg := []float64{}
 		MaxDelay := 0.0
-		for i := 0; i < len(config.LossPk); i = i + 1 {
+		for i := 0; i < minLen; i = i + 1 {
 			avg, _ := strconv.ParseFloat(config.AvgDelay[i], 64)
 			if MaxDelay < avg {
 				MaxDelay = avg
@@ -701,7 +720,12 @@ func configApiRoutes() {
 				},
 			},
 		}
-		graph.Render(chart.PNG, w)
+		err = graph.Render(chart.PNG, w)
+		if err != nil {
+			seelog.Error("[func:/api/graph.png] Render chart error: ", err)
+			GraphText(80, 70, "RENDER ERROR").Save(w)
+			return
+		}
 
 	})
 
