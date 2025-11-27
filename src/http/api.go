@@ -592,6 +592,11 @@ func configApiRoutes() {
 			GraphText(80, 70, "PARSE DATA ERROR").Save(w)
 			return
 		}
+		// 检查数据是否为空
+		if len(config.LossPk) == 0 || len(config.AvgDelay) == 0 || len(config.Lastcheck) == 0 {
+			GraphText(100, 70, "NO DATA").Save(w)
+			return
+		}
 		Xals := []float64{}
 		AvgDelay := []float64{}
 		LossPk := []float64{}
@@ -608,6 +613,10 @@ func configApiRoutes() {
 			Xals = append(Xals, float64(i))
 			Bkg = append(Bkg, 100.0)
 		}
+		// 确保 MaxDelay 不为 0，避免除零错误
+		if MaxDelay == 0 {
+			MaxDelay = 1.0
+		}
 		graph := chart.Chart{
 			Width:  300 * 3,
 			Height: 130 * 3,
@@ -621,7 +630,11 @@ func configApiRoutes() {
 				},
 				TickPosition: chart.TickPositionBetweenTicks,
 				ValueFormatter: func(v interface{}) string {
-					return config.Lastcheck[int(v.(float64))][11:16]
+					idx := int(v.(float64))
+					if idx >= 0 && idx < len(config.Lastcheck) && len(config.Lastcheck[idx]) >= 16 {
+						return config.Lastcheck[idx][11:16]
+					}
+					return ""
 				},
 			},
 			YAxis: chart.YAxis{
